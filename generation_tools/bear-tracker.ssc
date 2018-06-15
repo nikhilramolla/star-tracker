@@ -1,0 +1,113 @@
+// Name: Get the data
+// Author: Nikhil Reddy Ramolla, Kushagra Juneja
+// Description: watashi wa data ga hoshi!
+
+include("bear-data.inc");
+
+///Constant setup
+const MinFOV = 30;
+const MaxFOV = 90;
+const AspectRatio = 16/9;
+const JDay = 2451545.220345;
+const MagLimit = 6;
+const ShutterSpeed = 0.2;
+const StartTime = 2;
+const ImageCount = 10;
+const DEGREE = Math.PI/180;
+
+
+///Environmental setup
+core.setTimeRate(0);
+core.setJDay(JDay);
+LandscapeMgr.setFlagLandscape(false);
+LandscapeMgr.setFlagAtmosphere(true);
+StelSkyDrawer.setFlagTwinkle(false);
+NebulaMgr.setFlagShow(false);
+SporadicMeteorMgr.setFlagShow(false);
+MeteorShowers.setEnableLabels(false);
+MeteorShowersMgr.setEnableAtStartup(false);
+CustomObjectMgr.removeCustomObjects();
+SolarSystem.setFlagPlanets(false);
+StarMgr.setFlagLabels(false);
+MilkyWay.setFlagShow(true);
+ZodiacalLight.setFlagShow(false);
+StelSkyDrawer.setFlagStarMagnitudeLimit(true);
+StelSkyDrawer.setCustomStarMagnitudeLimit(MagLimit);
+
+
+///Debugging
+ConstellationMgr.setFlagLines(true);
+ConstellationMgr.setFlagLabels(true);
+
+
+///Viewport setup
+StelMovementMgr.setEquatorialMount(false);
+core.setProjectionMode("ProjectionPerspective");
+core.setGuiVisible(false);
+
+
+///Variables
+var RA, DEC, THETA, FOV, X, Y;
+
+
+///Helpers
+function transform(RA, DEC, THETA) {
+    RA *= DEGREE;
+    DEC *= DEGREE;
+    THETA *= DEGREE;
+    return function(star) {
+		var ra = star[0]*DEGREE;
+		var dec = star[1]*DEGREE;
+        return [
+			Math.tan(Math.acos(Math.sin(DEC)*Math.sin(dec)+Math.cos(DEC)*Math.cos(dec)*Math.cos(ra-RA))),
+			THETA+Math.atan(Math.sin(ra-RA)/(Math.sin(DEC)*Math.cos(ra-RA)-Math.cos(DEC)*Math.tan(dec)))
+		];
+    };
+}
+function isVisible(TR, star) {
+	var R = TR(star);
+    if(R[0]<0) {
+        return 0;
+    } else if(Math.abs(R[0]*Math.sin(R[1]))>=X) {
+        return 0;
+    } else if(Math.abs(R[0]*Math.cos(R[1]))>=Y) {
+        return 0;
+    } else {
+		return 1;
+	}
+}
+function getFraction(TR, stars) {
+	return stars.map(function(star) {return isVisible(TR, star);}).reduce(function(x,y) {return x+y;})/stars.length;
+}
+function setView(RA, DEC, THETA, FOV) {
+    core.setObserverLocation(RA, DEC, 0, 0, "", "");
+    core.moveToAltAzi(89.99, THETA, 0);
+	StelMovementMgr.zoomTo(FOV, 0);
+	Y = Math.tan(FOV*DEGREE/2);
+	X = AspectRatio*Y;
+}
+function getLabel(RA, DEC, THETA) {
+    var TR = transform(RA, DEC, THETA);
+	return constellation_names.map(function(name) {return getFraction(TR, constellation_stars[name]);});
+}
+
+
+///Data
+core.wait(StartTime);
+core.resetOutput();
+core.output("IMG "+constellation_names.join(" "));
+for(i=0; i<ImageCount; i++) {
+    RA = 360*Math.random()-180;
+    DEC = Math.asin(2*Math.random()-1)/DEGREE;
+    THETA = 360*Math.random();
+	FOV = MinFOV+(MaxFOV-MinFOV)*Math.random();
+    setView(RA, DEC, THETA, FOV);
+    core.output(i + " " + getLabel(RA, DEC, THETA).join(" "));
+    core.wait(ShutterSpeed);
+    core.screenshot(i, false, "", true);
+}
+
+
+///Wakarimashita. Nothing last forever. Not even this script.
+core.setGuiVisible(true);
+core.exit();
