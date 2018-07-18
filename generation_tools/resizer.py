@@ -30,7 +30,7 @@ while x != "yes":
 
 for i in range(ImageCount):
 	img = Image.open(Cwd % i)
-	img = img.resize((960, 540), Image.ANTIALIAS)
+	img = img.resize((256, 144), Image.ANTIALIAS)
 	img.save(Cwd % i)
 
 print("Success: Resizer has run succesfully")

@@ -1,3 +1,4 @@
 *.scr
 *.log
 __pycache__
+.vscode
