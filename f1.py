@@ -57,6 +57,8 @@ except:
 	write("Training file not found/ incompatible with model/ some other error.\n")
 model.to(device)
 
+model = model.eval()
+
 global_y = np.asarray([])
 global_y_test = np.asarray([])
 
