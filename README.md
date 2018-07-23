@@ -5,9 +5,10 @@ The aim of our project is to make a model which given an image of the night sky,
 ### Generating Data
 We made a [stellarium script](./generation_tools/bear-tracker.ssc) which takes snapshots of random images of the night sky.
 The script points to a random attitude, and takes a screenshot of the sky. The fractions of stars visible in each constellation is calculated using the _coordinates of the stars, attitude of view and FOV, aspect ratio of image_. Most of the atmospheric and astronomic effects (atmosphere, twinkling, meteors, planets, zodiacal light) are excluded, while some (milky way, magnitude limit) are left enabled. The images are originally 1920x1080, but we trained the CNN using scaled-down 256x144 images. Using this script, we made 10000 training and 1000 testing images: [data](https://drive.google.com/file/d/1ht-Py8yWtqoB3QZBt6jJJEHNFQDh-75X/view) 
+
 | Property | Value |
 | --- | --- |
-| FOV | 60<sup>d</sup> |
+| FOV | 60deg |
 | Mag Limit | 6 |
 | Aspect Ratio | 16:9 |
 | Projection | Perspective |
