@@ -4,14 +4,13 @@ The aim of our project is to make a model which given an image of the night sky,
 ## Procedure
 ### Generating Data
 We made a [stellarium script](./generation_tools/bear-tracker.ssc) which takes snapshots of random images of the night sky.
-The script points to a random attitude, and takes a screenshot of the sky. The fractions of stars visible in each constellation is calculated using the _coordinates of the stars, attitude of view and FOV, aspect ratio of image_. Most of the atmospheric and astronomic effects (atmosphere, twinkling, meteors, planets, zodiacal light) are excluded, while some (milky way, magnitude limit) are left enabled. Using this script, we made 10000 training and 1000 testing images: [data](https://drive.google.com/file/d/1ht-Py8yWtqoB3QZBt6jJJEHNFQDh-75X/view) 
+The script points to a random attitude, and takes a screenshot of the sky. The fractions of stars visible in each constellation is calculated using the _coordinates of the stars, attitude of view and FOV, aspect ratio of image_. Most of the atmospheric and astronomic effects (atmosphere, twinkling, meteors, planets, zodiacal light) are excluded, while some (milky way, magnitude limit) are left enabled. The images are originally 1920x1080, but we trained the CNN using scaled-down 256x144 images. Using this script, we made 10000 training and 1000 testing images: [data](https://drive.google.com/file/d/1ht-Py8yWtqoB3QZBt6jJJEHNFQDh-75X/view) 
 | Property | Value |
 | --- | --- |
 | FOV | 60<sup>d</sup> |
 | Mag Limit | 6 |
 | Aspect Ratio | 16:9 |
 | Projection | Perspective |
-> The images are originally 1920x1080, but we trained the CNN using scaled-down 256x144 images.
 ### Using CNN VGG16
 Now, after we have the dataset, we made a model which given the image tells how much percentage of each constellation belongs to the image. This appears as a classification problem. For this we did something similar to the VGG-16 classifier. But we wanted to keep images of different size(i.e. 256\*144) instead of 224*224(as used in the original paper of VGG-16 classifier) hence we made some changes in the structure to suit our needs. Also, classifying stars is not the same as classifying objects since essentially stars are discrete and other commonly observed objects are continuous. Hence, to tackle that we felt that the size of the filter should be large since it should be of the order of inter-star distance in order to give meaningful results. So, taking in mind the trade-off between results and computational time, we decided to keep the filter size of 7 instead of 3 as in the original paper. Also, we added batch normalisation and dropout layers to the model which were not present in the original paper.
 ### Generated label properties
